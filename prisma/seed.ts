@@ -34,14 +34,25 @@ async function main() {
     },
   });
 
-  const cat = await prisma.category.create({
-    data: {
-      name: "Greetings",
-      slug: "greetings",
-      description: "Common Yoruba greetings",
-      active: true,
-    },
-  });
+  // ✅ YOUR NICE CATEGORIES BACK
+  const categoriesData = [
+    { name: 'Greetings', slug: 'greetings', description: 'Ẹ kú - Daily greetings and respect' },
+    { name: 'Love', slug: 'love', description: 'Ìfẹ́ - Love, affection & relationships' },
+    { name: 'Family', slug: 'family', description: 'Ẹbí - Family, people & kinship' },
+    { name: 'Food', slug: 'food', description: 'Oúnjẹ - Food, drink & cooking' },
+    { name: 'Nature', slug: 'nature', description: 'Ìṣẹ̀dá - Nature, water, sky & earth' },
+    { name: 'Common', slug: 'common', description: 'Ọ̀rọ̀ wọ́pọ̀ - Everyday common words' },
+    { name: 'Body', slug: 'body', description: 'Ara - Body, health & wellness' },
+    { name: 'Spirituality', slug: 'spirituality', description: 'Ẹ̀mí - Spirit, faith & culture' },
+    { name: 'Numbers', slug: 'numbers', description: 'Nọ́mbà - Numbers, time & days' },
+  ];
+
+  const cats: Record<string, any> = {};
+  for (const c of categoriesData) {
+    cats[c.slug] = await prisma.category.create({ data: { ...c, active: true } });
+  }
+
+  console.log(`Created ${categoriesData.length} categories`);
 
   const words = [
     {
@@ -52,6 +63,7 @@ async function main() {
       exampleYo: "Ẹ kú àárọ̀, báwo ni?",
       exampleEn: "Good morning, how are you?",
       conceptKey: "good-morning",
+      category: "greetings",
     },
     {
       yoruba: "Omi",
@@ -59,6 +71,7 @@ async function main() {
       ipa: "/o.mi/",
       partOfSpeech: "noun",
       conceptKey: "water",
+      category: "nature",
     },
     {
       yoruba: "Ìfẹ́",
@@ -66,6 +79,7 @@ async function main() {
       ipa: "/ì.fɛ́/",
       partOfSpeech: "noun",
       conceptKey: "love",
+      category: "love",
     },
   ];
 
@@ -74,7 +88,7 @@ async function main() {
       data: {
         yoruba: w.yoruba,
         normalizedWord: normYo(w.yoruba),
-        normalizedEnglish: normEn(w.english), // ✅ FIXED - this was missing
+        normalizedEnglish: normEn(w.english),
         slug: w.yoruba.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
         english: w.english,
         ipa: (w as any).ipa,
@@ -82,7 +96,7 @@ async function main() {
         exampleYo: (w as any).exampleYo,
         exampleEn: (w as any).exampleEn,
         conceptKey: (w as any).conceptKey,
-        categoryId: cat.id,
+        categoryId: cats[w.category].id,
         contributorId: contributor.id,
         status: "APPROVED",
         views: 0,
@@ -90,7 +104,7 @@ async function main() {
     });
   }
 
-  console.log("Seeded 3 words + admin + contributor");
+  console.log("Seeded 3 words + admin + contributor + 8 categories");
 }
 
 main()
