@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 // src/app/about/page.tsx - SERVER (SEO + fetch total)
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
