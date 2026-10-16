@@ -167,16 +167,15 @@ export default function YorubaKeyboard({
   );
 
   // Mobile: fixed bottom sheet - your good version, untouched
-  if (isMobile || !position) {
-    return (
-      <div ref={keyboardRef} className="fixed bottom-0 left-0 right-0 z-[9999] bg-[#121212] border-t border-zinc-800 rounded-t-[20px] p-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.4)] animate-in slide-in-from-bottom duration-300 md:hidden">
-        <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-3" />
-        <div className="max-w-[480px] mx-auto">
-          {KeyboardContent}
-        </div>
-      </div>
-    );
-  }
+  // 1. Change mobile wrapper to 360px max + prevent zoom
+if (isMobile ||!position) {
+  return (
+    <div ref={keyboardRef} className="fixed bottom-0 left-0 right-0 z-[9999] bg-[#121212] border-t border-zinc-800 rounded-t- p-2.5 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.4)] animate-in slide-in-from-bottom duration-300 md:hidden w-full max-w- overflow-hidden touch-manipulation">
+      <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-2.5" />
+      <div className="w-full max-w- mx-auto">{KeyboardContent}</div>
+    </div>
+  );
+}
 
   // Desktop: FIXED position directly below Yoruba box, black bg white text
   return (
