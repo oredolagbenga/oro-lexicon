@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  passwordHash  String?
+  emailVerified Boolean  @default(false)
+  image         String?
+  role          String   @default("CONTRIBUTOR")
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  words           Word[]
+  audioRecordings AudioRecording[]
+  wordReviews     WordReview[]     @relation("ReviewerWord")
+  audioReviews    AudioReview[]    @relation("ReviewerAudio")
+  notifications   Notification[]
+  auditLogs       AuditLog[]       @relation("ActorLogs")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  words       Word[]
+}
+
+model Word {
+  id                String   @id @default(cuid())
+  yoruba            String
+  normalizedWord    String // "ọjọ́" -> "ojo" - lower + strip tones + alphanum
+  normalizedEnglish String // "Rain" -> "rain" - lower trim
+  slug              String   @unique
+  english           String
+  translation       String?
+  ipa               String?
+  partOfSpeech      String
+  exampleYo         String?
+  exampleEn         String?
+  conceptKey        String?
+  status            String   @default("PENDING")
+  views             Int      @default(0)
+
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id])
+  contributorId String
+  contributor   User     @relation(fields: [contributorId], references: [id])
+
+  audioRecordings AudioRecording[]
+  reviews         WordReview[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  approvedAt DateTime?
+  approvedBy String?
+
+  
+  @@index([status])
+  @@index([normalizedWord])
+  @@index([categoryId])
+  @@index([contributorId])
+}
+
+model AudioRecording {
+  id                 String   @id @default(cuid())
+  wordId             String
+  word               Word     @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  contributorId      String
+  contributor        User     @relation(fields: [contributorId], references: [id])
+  cloudinaryPublicId String?
+  secureUrl          String
+  fileType           String?
+  fileSize           Int?
+  duration           Float?
+  status             String   @default("PENDING")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  approvedAt         DateTime?
+  approvedBy         String?
+  reviews            AudioReview[]
+
+  @@index([wordId])
+  @@index([status])
+  @@index([contributorId])
+}
+
+model WordReview {
+  id         String   @id @default(cuid())
+  wordId     String
+  word       Word     @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User     @relation("ReviewerWord", fields: [reviewerId], references: [id])
+  prevStatus String
+  newStatus  String
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@index([wordId])
+}
+
+model AudioReview {
+  id         String   @id @default(cuid())
+  audioId    String
+  audio      AudioRecording @relation(fields: [audioId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User           @relation("ReviewerAudio", fields: [reviewerId], references: [id])
+  prevStatus String
+  newStatus  String
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@index([audioId])
+}
+
+model Notification {
+  id String @id @default(cuid())
+  recipientId String
+  recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  type String
+  title String
+  message String
+  relatedType String?
+  relatedId String?
+  read Boolean @default(false)
+  createdAt DateTime @default(now())
+  readAt DateTime?
+
+  @@index([recipientId, read])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation("ActorLogs", fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
