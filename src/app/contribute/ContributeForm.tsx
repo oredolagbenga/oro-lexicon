@@ -207,9 +207,7 @@ export default function ContributeForm({ categories }: { categories: { id: strin
 
   return (
     <div className="space-y-6 relative">
-      <div data-yoruba-keyboard data-keyboard-root>
-        <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={anchorRef} />
-      </div>
+      
 
       {/* UPLOADING INDICATOR - explains why audio is slower */}
       {loading && (
@@ -257,10 +255,13 @@ export default function ContributeForm({ categories }: { categories: { id: strin
         {checking && !isResubmit && <div className="text-[11px] text-black/40 flex items-center gap-2"><span className="w-3 h-3 border-2 border-black/10 border-t-[#1a4d2e] rounded-full animate-spin" /> Checking for duplicate...</div>}
 
         <div className="grid md:grid-cols-2 gap-5">
-          <div>
-            <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">Yoruba Word *</label>
-            <input ref={refs.yoruba} onFocus={() => setActiveField("yoruba")} value={form.yoruba} onChange={e => setForm({ ...form, yoruba: e.target.value })} required placeholder="ẹ kú àárọ̀" className={`mt-2 w-full h-12 rounded-[12px] bg-[#fafaf7] border px-4 text-[16px] focus:outline-none focus:bg-white ${duplicate ? "border-amber-300" : "border-black/10 focus:border-[#1a4d2e]"}`} />
-          </div>
+            <div>
+              <label className="text- font-bold tracking-widest uppercase text-black/40">Yoruba Word *</label>
+              <input ref={refs.yoruba} onFocus={() => setActiveField("yoruba")} value={form.yoruba} onChange={e => setForm({ ...form, yoruba: e.target.value })} required placeholder="ẹ kú àárọ̀" className="mt-2 w-full h-12 rounded- bg-[#fafaf7] border px-4 text- focus:outline-none focus:bg-white border-black/10 focus:border-[#1a4d2e]" />
+              {showKeyboard && activeField === "yoruba" && (
+                <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.yoruba as any} />
+              )}
+            </div>
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">English *</label>
             <input ref={refs.english} onFocus={() => setActiveField("english")} value={form.english} onChange={e => setForm({ ...form, english: e.target.value })} required placeholder="good morning" className="mt-2 w-full h-12 rounded-[12px] bg-[#fafaf7] border border-black/10 px-4 text-[15px] focus:outline-none focus:bg-white focus:border-[#1a4d2e]" />

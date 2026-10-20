@@ -24,3 +24,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ✅ FIX iPhone auto-zoom: inputs must be 16px on mobile */
+@media screen and (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Prevent double-tap zoom on keyboard buttons */
+button {
+  touch-action: manipulation;
+}
