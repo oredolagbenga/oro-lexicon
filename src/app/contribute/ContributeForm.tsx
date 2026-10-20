@@ -262,6 +262,9 @@ export default function ContributeForm({ categories }: { categories: { id: strin
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">IPA</label>
             <input ref={refs.ipa} onFocus={() => setActiveField("ipa")} value={form.ipa} onChange={e => setForm({ ...form, ipa: e.target.value })} placeholder="/ẹ kú àárọ̀/" className="mt-2 w-full h-12 rounded-[12px] bg-[#fafaf7] border border-black/10 px-4 text-[14px] font-mono focus:outline-none focus:bg-white focus:border-[#1a4d2e]" />
+              {showKeyboard && activeField === "yoruba" && (
+                <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.yoruba as any} />
+              )}
           </div>
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">Part of Speech *</label>
@@ -278,6 +281,9 @@ export default function ContributeForm({ categories }: { categories: { id: strin
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">Yoruba Example</label>
             <textarea ref={refs.exampleYo} onFocus={() => setActiveField("exampleYo")} value={form.exampleYo} onChange={e => setForm({ ...form, exampleYo: e.target.value })} placeholder="Ẹ kú àárọ̀" rows={3} className="mt-2 w-full rounded-[12px] bg-[#fafaf7] border border-black/10 p-4 text-[14px] focus:outline-none focus:bg-white focus:border-[#1a4d2e]" />
+              {showKeyboard && activeField === "yoruba" && (
+                <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.yoruba as any} />
+              )}
           </div>
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">English Example</label>
