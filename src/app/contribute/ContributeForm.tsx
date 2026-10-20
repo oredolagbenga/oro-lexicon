@@ -57,7 +57,7 @@ export default function ContributeForm({ categories }: { categories: { id: strin
 
   const yorubaFields = ["yoruba", "ipa", "exampleYo"];
   const showKeyboard = activeField ? yorubaFields.includes(activeField) : false;
-  const anchorRef = activeField ? (refs as any)[activeField] as React.RefObject<HTMLElement> : undefined;
+  
 
   useEffect(() => {
     if (categories.length && !form.categoryId) setForm(f => ({ ...f, categoryId: categories[0].id }));
@@ -246,11 +246,9 @@ export default function ContributeForm({ categories }: { categories: { id: strin
 
         <div className="grid md:grid-cols-2 gap-5">
             <div>
-              <label className="text- font-bold tracking-widest uppercase text-black/40">Yoruba Word *</label>
-              <input ref={refs.yoruba} onFocus={() => setActiveField("yoruba")} value={form.yoruba} onChange={e => setForm({ ...form, yoruba: e.target.value })} required placeholder="ẹ kú àárọ̀" className="mt-2 w-full h-12 rounded- bg-[#fafaf7] border px-4 text- focus:outline-none focus:bg-white border-black/10 focus:border-[#1a4d2e]" />
-              {showKeyboard && activeField === "yoruba" && (
-                <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.yoruba as any} />
-              )}
+              <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">Yoruba Word *</label>
+            <input ref={refs.yoruba} onFocus={() => setActiveField("yoruba")} value={form.yoruba} onChange={e => setForm({ ...form, yoruba: e.target.value })} required placeholder="ẹ kú àárọ̀" className="mt-2 w-full h-12 rounded-[12px] bg-[#fafaf7] border border-black/10 px-4 text-[16px] focus:outline-none focus:bg-white focus:border-[#1a4d2e]" />
+            {activeField === "yoruba" && showKeyboard && <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.yoruba as any} />}
             </div>
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">English *</label>
@@ -261,10 +259,8 @@ export default function ContributeForm({ categories }: { categories: { id: strin
         <div className="grid md:grid-cols-2 gap-5">
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">IPA</label>
-            <input ref={refs.ipa} onFocus={() => setActiveField("ipa")} value={form.ipa} onChange={e => setForm({ ...form, ipa: e.target.value })} placeholder="/ẹ kú àárọ̀/" className="mt-2 w-full h-12 rounded-[12px] bg-[#fafaf7] border border-black/10 px-4 text-[14px] font-mono focus:outline-none focus:bg-white focus:border-[#1a4d2e]" />
-              {showKeyboard && activeField === "yoruba" && (
-                <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.yoruba as any} />
-              )}
+            <input ref={refs.ipa} onFocus={() => setActiveField("ipa")} value={form.ipa} onChange={e => setForm({ ...form, ipa: e.target.value })} placeholder="/ẹ kú àárọ̀/" className="mt-2 w-full h-12 rounded-[12px] bg-[#fafaf7] border border-black/10 px-4 text-[16px] font-mono focus:outline-none focus:bg-white focus:border-[#1a4d2e]" />
+            {activeField === "ipa" && showKeyboard && <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.ipa as any} />}
           </div>
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">Part of Speech *</label>
@@ -280,10 +276,9 @@ export default function ContributeForm({ categories }: { categories: { id: strin
         <div className="grid md:grid-cols-2 gap-5">
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">Yoruba Example</label>
-            <textarea ref={refs.exampleYo} onFocus={() => setActiveField("exampleYo")} value={form.exampleYo} onChange={e => setForm({ ...form, exampleYo: e.target.value })} placeholder="Ẹ kú àárọ̀" rows={3} className="mt-2 w-full rounded-[12px] bg-[#fafaf7] border border-black/10 p-4 text-[14px] focus:outline-none focus:bg-white focus:border-[#1a4d2e]" />
-              {showKeyboard && activeField === "yoruba" && (
-                <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.yoruba as any} />
-              )}
+            <textarea ref={refs.exampleYo} onFocus={() => setActiveField("exampleYo")} value={form.exampleYo} onChange={e => setForm({ ...form, exampleYo: e.target.value })} placeholder="Ẹ kú àárọ̀" rows={3} className="mt-2 w-full rounded-[12px] bg-[#fafaf7] border border-black/10 p-4 text-[16px] focus:outline-none focus:bg-white focus:border-[#1a4d2e]" />
+            {activeField === "exampleYo" && showKeyboard && <YorubaKeyboard visible={showKeyboard} onInsert={insertChar} onClose={() => setActiveField(null)} anchorRef={refs.exampleYo as any} />}
+          
           </div>
           <div>
             <label className="text-[11px] font-bold tracking-widest uppercase text-black/40">English Example</label>
