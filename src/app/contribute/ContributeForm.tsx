@@ -30,11 +30,9 @@ export default function ContributeForm({ categories }: { categories: { id: strin
   const [error, setError] = useState("");
   const [duplicate, setDuplicate] = useState<any>(null);
   const [checking, setChecking] = useState(false);
-
   const [isResubmit, setIsResubmit] = useState(false);
   const [originalWord, setOriginalWord] = useState<any>(null);
   const [loadingResubmit, setLoadingResubmit] = useState(false);
-
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [uploadedAudioId, setUploadedAudioId] = useState<string | null>(null);
@@ -55,10 +53,9 @@ export default function ContributeForm({ categories }: { categories: { id: strin
 
   const yorubaFields = ["yoruba", "ipa", "exampleYo"];
   const showKeyboard = activeField ? yorubaFields.includes(activeField) : false;
+  const anchorRef = activeField ? (refs as any)[activeField] as React.RefObject<HTMLElement> : undefined;
 
-  useEffect(() => {
-    if (categories.length && !form.categoryId) setForm(f => ({ ...f, categoryId: categories[0].id }));
-  }, [categories]);
+  useEffect(() => { if (categories.length && !form.categoryId) setForm(f => ({ ...f, categoryId: categories[0].id })); }, [categories]);
 
   useEffect(() => {
     if (!resubmitId) return;
@@ -89,6 +86,18 @@ export default function ContributeForm({ categories }: { categories: { id: strin
     return () => clearTimeout(t);
   }, [form.yoruba, form.english, isResubmit]);
 
+  // FIXED: Don't close when clicking keyboard keys
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-yoruba-keyboard]")) return;
+      if (target.closest("input") || target.closest("textarea") || target.closest("select")) return;
+      setActiveField(null);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
   useEffect(() => {
     if (isRecording) { timerRef.current = setInterval(() => setRecordTime(s => s + 1), 1000); }
     else { if (timerRef.current) clearInterval(timerRef.current); setRecordTime(0); }
@@ -111,8 +120,7 @@ export default function ContributeForm({ categories }: { categories: { id: strin
   const startRec = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const rec = new MediaRecorder(stream);
-      const chunks: BlobPart[] = [];
+      const rec = new MediaRecorder(stream); const chunks: BlobPart[] = [];
       rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
       rec.onstop = () => {
         const blob = new Blob(chunks, { type: "audio/webm" });
@@ -138,12 +146,10 @@ export default function ContributeForm({ categories }: { categories: { id: strin
       let wordId: string; let wordSlug: string;
       if (isResubmit && originalWord) {
         const r = await fetch(`/api/words/${originalWord.id}/resubmit`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
-        const d = await r.json(); if (!r.ok) throw new Error(d.error);
-        wordId = d.word.id; wordSlug = d.word.slug;
+        const d = await r.json(); if (!r.ok) throw new Error(d.error); wordId = d.word.id; wordSlug = d.word.slug;
       } else {
         const r = await fetch("/api/words", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
-        const d = await r.json(); if (!r.ok) throw new Error(d.error);
-        wordId = d.word.id; wordSlug = d.word.slug;
+        const d = await r.json(); if (!r.ok) throw new Error(d.error); wordId = d.word.id; wordSlug = d.word.slug;
       }
       if (audioFile && wordId) {
         const fd = new FormData(); fd.append("file", audioFile); fd.append("wordId", wordId); fd.append("slug", wordSlug);
@@ -160,12 +166,11 @@ export default function ContributeForm({ categories }: { categories: { id: strin
   return (
     <div className="space-y-6 relative">
       {loading && (
-        <div className="fixed bottom-6 right-6 z-[80] bg-[#121212] text-white px-5 py-4 rounded- text- font-bold shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center gap-3">
+        <div className="fixed bottom-6 right-6 z-[80] bg-[#121212] text-white px-5 py-4 rounded- text- font-bold shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center gap-3 animate-in slide-in-from-bottom-4">
           <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-          <div><div>{audioFile ? "Uploading audio... 5-12s" : "Saving word..."}</div><div className="text- font-normal text-white/60">{audioFile ? "Transcoding audio" : "Checking tones"}</div></div>
+          <div><div>{audioFile ? "Uploading audio to Cloudinary... 5-12s" : "Saving word..."}</div><div className="text- font-normal text-white/60">{audioFile ? "Transcoding audio, please wait" : "Checking tones"}</div></div>
         </div>
       )}
-
       {showSuccess.open && (
         <div className="fixed inset-0 z-[100] bg-[#1a4d2e]/30 backdrop-blur- flex items-center justify-center p-4">
           <div className="bg-[#fcfaf0] rounded- max-w- w-full p-8 border border-[#1a4d2e]/10 shadow-[0_32px_120px_rgba(0,0,0,0.3)] text-center">
@@ -174,20 +179,18 @@ export default function ContributeForm({ categories }: { categories: { id: strin
             <div className="mt-3 inline-flex px-3 py-1 rounded-full bg-[#f5d547] text- font-bold tracking-wide">PENDING REVIEW • AWAITING ADMIN</div>
             <p className="mt-4 text- leading-[1.6] text-[#1a4d2e]/70"><b className="text-[#1a4d2e]">{showSuccess.yoruba}</b> = {showSuccess.english} {showSuccess.hasAudio && "🎙 with audio"} is now waiting for review.</p>
             <div className="mt-7 grid grid-cols-2 gap-3">
-              <button onClick={()=>{ setShowSuccess({open:false, yoruba:"", english:"", hasAudio:false}); router.push("/dashboard"); }} className="h-12 rounded-full bg-[#1a4d2e] text-white font-bold text-">Go to Dashboard</button>
+              <button onClick={()=>{ setShowSuccess({open:false, yoruba:"", english:"", hasAudio:false}); router.push("/dashboard"); }} className="h-12 rounded-full bg-[#1a4d2e] text-white font-bold text- hover:bg-black">Go to Dashboard</button>
               <button onClick={()=>{ setShowSuccess({open:false, yoruba:"", english:"", hasAudio:false}); setForm({ yoruba: "", english: "", ipa: "", partOfSpeech: "NOUN", categoryId: categories[0]?.id || "", exampleYo: "", exampleEn: "", translation: "" }); removeAudio(); }} className="h-12 rounded-full bg-white border border-[#1a4d2e]/10 font-bold text-">Add Another +</button>
             </div>
           </div>
         </div>
       )}
-
       {isResubmit && (
         <div className="bg-amber-50 border border-amber-200 rounded- p-4 flex gap-3">
           <span className="text-">✏</span>
-          <div><div className="font-bold text- text-amber-900">Fix & Resubmit — "{originalWord?.yoruba}"</div><div className="text- text-amber-800 mt-1">Fix what admin complained about and resubmit — it goes back to PENDING.</div></div>
+          <div><div className="font-bold text- text-amber-900">Fix & Resubmit Mode — "{originalWord?.yoruba}"</div><div className="text- text-amber-800 mt-1">Fix what admin complained about and resubmit — it goes back to PENDING.</div></div>
         </div>
       )}
-
       <form onSubmit={handleSubmit} className="bg-white rounded- border border-black/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.06)] p-6 md:p-10 space-y-6">
         <div className="h- -mx-6 md:-mx-10 -mt-6 md:-mt-10 mb-8 bg-gradient-to-r from-[#1a4d2e] via-[#2a7a4b] to-[#f5d547] rounded-t-" />
         {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded- p-3 text-">{error}</div>}
@@ -214,17 +217,13 @@ export default function ContributeForm({ categories }: { categories: { id: strin
           </div>
           <div>
             <label className="text- font-bold tracking-widest uppercase text-black/40">Part of Speech *</label>
-            <select value={form.partOfSpeech} onChange={e => setForm({ ...form, partOfSpeech: e.target.value })} className="mt-2 w-full h-12 rounded- bg-[#fafaf7] border border-black/10 px-4 text- focus:outline-none focus:bg-white">
-              {POS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-            </select>
+            <select value={form.partOfSpeech} onChange={e => setForm({ ...form, partOfSpeech: e.target.value })} className="mt-2 w-full h-12 rounded- bg-[#fafaf7] border border-black/10 px-4 text- focus:outline-none focus:bg-white">{POS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}</select>
           </div>
         </div>
 
         <div>
           <label className="text- font-bold tracking-widest uppercase text-black/40">Category *</label>
-          <select value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })} required className="mt-2 w-full h-12 rounded- bg-[#fafaf7] border border-black/10 px-4 text- focus:outline-none focus:bg-white">
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <select value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })} required className="mt-2 w-full h-12 rounded- bg-[#fafaf7] border border-black/10 px-4 text- focus:outline-none focus:bg-white">{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">
@@ -241,11 +240,11 @@ export default function ContributeForm({ categories }: { categories: { id: strin
 
         <div className="bg-[#f8faf8] rounded- border border-black/[0.06] p-5">
           <div className="flex items-center justify-between mb-3">
-            <label className="text- font-bold tracking-widest uppercase text-black/50">Audio Pronunciation (optional)</label>
+            <label className="text- font-bold tracking-widest uppercase text-black/50">Audio Pronunciation (optional) - takes 5-12s extra</label>
             {isRecording && <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-full px-3 py-1"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /><span className="text- font-bold text-red-600">REC {formatTime(recordTime)}</span></div>}
           </div>
           <div className="flex flex-wrap gap-3 items-center">
-            {!isRecording ? <button type="button" onClick={startRec} className="h-11 px-5 rounded-full bg-[#1a4d2e] text-white text- font-bold">🎙 Record</button> : <button type="button" onClick={stopRec} className="h-11 px-5 rounded-full bg-red-600 text-white text- font-bold">⏹ Stop • {formatTime(recordTime)}</button>}
+            {!isRecording ? <button type="button" onClick={startRec} className="h-11 px-5 rounded-full bg-[#1a4d2e] text-white text- font-bold flex items-center gap-2">🎙 Record</button> : <button type="button" onClick={stopRec} className="h-11 px-5 rounded-full bg-red-600 text-white text- font-bold">⏹ Stop • {formatTime(recordTime)}</button>}
             <label className="h-11 px-5 rounded-full bg-white border border-black/10 text- font-semibold flex items-center gap-2 cursor-pointer">📁 Upload<input type="file" accept="audio/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setAudioFile(f); setAudioPreview(URL.createObjectURL(f)); } }} /></label>
             {audioPreview && <div className="flex items-center gap-2 bg-white border rounded-full pl-3 pr-2 h-11"><audio controls src={audioPreview} className="h-8 w-" /><button type="button" onClick={removeAudio} className="w-7 h-7 rounded-full bg-red-50 border border-red-200 text-red-600 flex items-center justify-center">✕</button></div>}
           </div>
