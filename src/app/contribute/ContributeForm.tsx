@@ -133,25 +133,34 @@ export default function ContributeForm({ categories }: { categories: { id: strin
     setTimeout(() => { ref.focus(); ref.setSelectionRange(s + char.length, s + char.length); }, 0);
   }
 
-  const startRec = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const rec = new MediaRecorder(stream); 
-      const chunks: BlobPart[] = [];
-      rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-      rec.onstop = () => {
-        const blob = new Blob(chunks, { type: "audio/webm" });
-        const file = new File([blob], `yoruba-${Date.now()}.webm`, { type: "audio/webm" });
-        setAudioFile(file); 
-        setAudioPreview(URL.createObjectURL(blob));
-        stream.getTracks().forEach(t => t.stop());
-        setIsRecording(false);
-      };
-      recRef.current = rec; 
-      rec.start(); 
-      setIsRecording(true);
-    } catch { setError("Mic permission denied"); }
-  };
+ const startRec = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    let mimeType = "";
+    if (isIOS) {
+      if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+    } else {
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+      else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
+      else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+    }
+    const rec = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+    const chunks: BlobPart[] = [];
+    rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    rec.onstop = () => {
+      const realMime = rec.mimeType || mimeType || 'audio/mp4';
+      const ext = realMime.includes('mp4') ? 'm4a' : 'webm';
+      const blob = new Blob(chunks, { type: realMime });
+      const file = new File([blob], `yoruba-${Date.now()}.${ext}`, { type: realMime });
+      setAudioFile(file);
+      setAudioPreview(URL.createObjectURL(blob));
+      stream.getTracks().forEach(t => t.stop());
+      setIsRecording(false);
+    };
+    recRef.current = rec; rec.start(); setIsRecording(true);
+  } catch { setError("Mic permission denied"); }
+};
   const stopRec = () => recRef.current?.stop();
   const removeAudio = async () => {
     if (uploadedAudioId) { try { await fetch(`/api/upload/audio?audioId=${uploadedAudioId}`, { method: "DELETE" }); } catch {} setUploadedAudioId(null); }
@@ -294,7 +303,7 @@ export default function ContributeForm({ categories }: { categories: { id: strin
           <div className="flex flex-wrap gap-3 items-center">
             {!isRecording ? <button type="button" onClick={startRec} className="h-11 px-5 rounded-full bg-[#1a4d2e] text-white text-[13px] font-bold flex items-center gap-2">🎙 Record</button> : <button type="button" onClick={stopRec} className="h-11 px-5 rounded-full bg-red-600 text-white text-[13px] font-bold">⏹ Stop • {formatTime(recordTime)}</button>}
             <label className="h-11 px-5 rounded-full bg-white border border-black/10 text-[13px] font-semibold flex items-center gap-2 cursor-pointer">📁 Upload<input type="file" accept="audio/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setAudioFile(f); setAudioPreview(URL.createObjectURL(f)); } }} /></label>
-            {audioPreview && <div className="flex items-center gap-2 bg-white border rounded-full pl-3 pr-2 h-11"><audio controls src={audioPreview} className="h-8 w-[180px]" /><button type="button" onClick={removeAudio} className="w-7 h-7 rounded-full bg-red-50 border border-red-200 text-red-600 flex items-center justify-center">✕</button></div>}
+            {audioPreview && <div className="flex items-center gap-2 bg-white border rounded-full pl-3 pr-2 h-11"><audio controls playsInline src={audioPreview} className="h-8 w-[180px]" /><button type="button" onClick={removeAudio} className="w-7 h-7 rounded-full bg-red-50 border border-red-200 text-red-600 flex items-center justify-center">✕</button></div>}
           </div>
           {audioFile && <div className="mt-3 flex items-center justify-between bg-white border rounded-[10px] px-3 py-2"><div className="text-[11px] text-black/60">Selected: <b className="text-black">{audioFile.name}</b> • {(audioFile.size/1024).toFixed(0)}KB</div><button type="button" onClick={removeAudio} className="h-7 px-3 rounded-full bg-red-50 border border-red-200 text-red-600 text-[11px] font-bold">Remove</button></div>}
         </div>
