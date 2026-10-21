@@ -14,10 +14,57 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Oro Lexicon - Yoruba Dictionary",
-  description: "Preserve Yoruba language - Contribute words",
+  metadataBase: new URL("https://lexicon.oredola.dev"),
+  title: {
+    default: "Oro Lexicon - Yoruba Dictionary | Preserve Yoruba Language",
+    template: "%s | Oro Lexicon",
+  },
+  description: "Oro Lexicon by Oredola Gbenga Augustine — community-driven Yorùbá archive preserving Egba, Ijebu & Standard Yorùbá with accurate tones, IPA and native audio. 1000+ Yoruba words with English meaning, pronunciation & examples.",
+  keywords: [
+    "Yoruba dictionary",
+    "Yoruba to English",
+    "English to Yoruba",
+    "Yoruba meaning",
+    "Yoruba language",
+    "Yoruba words",
+    "Oro Lexicon",
+    "Yoruba pronunciation",
+    "Learn Yoruba",
+  ],
+  authors: [{ name: "Oredola Gbenga Augustine", url: "https://oredola.dev" }],
+  creator: "Oredola Gbenga Augustine",
+  publisher: "Oro Lexicon",
   verification: {
-    google: "googledd300aa541d3a7e6", // paste your code here
+    google: "googledd300aa541d3a7e6",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    url: "https://lexicon.oredola.dev",
+    siteName: "Oro Lexicon",
+    title: "Oro Lexicon - Yoruba Dictionary",
+    description: "Preserve Yoruba language - 1000+ Yoruba words with native audio, IPA, and examples by Oredola Gbenga Augustine.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Oro Lexicon" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Oro Lexicon - Yoruba Dictionary",
+    description: "Preserve Yoruba language with native audio & accurate tones",
+    creator: "@oredola",
+  },
+  alternates: {
+    canonical: "https://lexicon.oredola.dev",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
