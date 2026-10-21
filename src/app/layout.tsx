@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Oro Lexicon - Yoruba Dictionary",
   description: "Preserve Yoruba language - Contribute words",
+  verification: {
+    google: "googledd300aa541d3a7e6", // paste your code here
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
