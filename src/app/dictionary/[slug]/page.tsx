@@ -6,6 +6,36 @@ import { Navbar } from "@/app/components/layout/Navbar";
 import { Footer } from "@/app/components/layout/Footer";
 import { WordAudioPlayer } from "./WordAudioPlayer";
 
+// STEP 2 SEO: This makes Google rank you
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const { prisma } = await import("@/lib/prisma");
+  const word = await prisma.word.findUnique({ where: { slug: params.slug } });
+  
+  if (!word) {
+    return { title: "Word not found | Oredola Lexicon" };
+  }
+
+  const title = `${word.yoruba} - ${word.english} in Yoruba | Meaning, Pronunciation & Examples`;
+  const description = `What does ${word.yoruba} mean? ${word.yoruba} means ${word.english} in English. ${word.ipa ? `IPA: ${word.ipa}.` : ''} Example: ${word.exampleYo || word.yoruba} - ${word.exampleEn || word.english}. Listen to native pronunciation audio.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      `${word.yoruba} meaning`,
+      `${word.yoruba} in English`,
+      `what does ${word.yoruba} mean`,
+      `${word.yoruba} Yoruba to English`,
+      `${word.english} in Yoruba`,
+    ],
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: `https://lexicon.oredola.dev/dictionary/${word.slug}`,
+    },
+  };
+}
 export default async function WordDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!slug) notFound();
