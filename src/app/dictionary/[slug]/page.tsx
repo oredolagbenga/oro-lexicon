@@ -150,6 +150,39 @@ export default async function WordDetailPage({ params }: { params: Promise<{ slu
         )}
       </div>
 
+           {/* SEO: Dictionary Schema - makes Google show as dictionary */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "DefinedTermSet",
+            name: "Oro Lexicon - Yoruba Dictionary",
+            hasDefinedTerm: {
+              "@type": "DefinedTerm",
+              name: word.yoruba,
+              description: word.english,
+              termCode: word.slug,
+              inDefinedTermSet: "https://lexicon.oredola.dev",
+              url: `https://lexicon.oredola.dev/dictionary/${word.slug}`,
+            },
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Dictionary", item: "https://lexicon.oredola.dev/dictionary" },
+              { "@type": "ListItem", position: 2, name: word.yoruba, item: `https://lexicon.oredola.dev/dictionary/${word.slug}` },
+            ],
+          }),
+        }}
+      />
+
       <Footer totalWords={totalWords} />
     </div>
   );
