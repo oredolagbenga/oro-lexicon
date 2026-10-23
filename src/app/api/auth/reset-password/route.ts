@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   const { token, password } = await req.json();
-  if (!token || !password || password.length < 8) return Response.json({ error: "Invalid" }, { status: 400 });
+  if (!token || !password || password.length < 8) return Response.json({ error: "Password must be 8+ chars" }, { status: 400 });
 
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
   const record = await prisma.passwordResetToken.findUnique({ where: { tokenHash } });
@@ -14,7 +14,13 @@ export async function POST(req: Request) {
   }
 
   const hashed = await bcrypt.hash(password, 10);
-  await prisma.user.update({ where: { id: record.userId }, data: { password: hashed } });
+  
+  // FIXED: use passwordHash not password
+  await prisma.user.update({ 
+    where: { id: record.userId }, 
+    data: { passwordHash: hashed, emailVerified: true, status: "ACTIVE" } 
+  });
+  
   await prisma.passwordResetToken.update({ where: { id: record.id }, data: { used: true } });
 
   return Response.json({ ok: true });

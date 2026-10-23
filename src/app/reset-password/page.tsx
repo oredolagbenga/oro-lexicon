@@ -1,47 +1,58 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
-export const dynamic = "force-dynamic";
-
-function ResetInner() {
-  const token = useSearchParams().get("token");
-  const [pw, setPw] = useState(""); 
-  const [error, setError] = useState(""); 
+export default function ResetPasswordPage() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
   const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function submit(e: any) {
     e.preventDefault();
-    const res = await fetch("/api/auth/reset-password", { 
-      method: "POST", 
-      headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ token, password: pw }) 
+    if (!token) { setMsg("Invalid link - no token"); return; }
+    setLoading(true);
+    setMsg("Resetting...");
+    const res = await fetch("/api/auth/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, password }),
     });
     const data = await res.json();
-    if (!res.ok) { setError(data.error); return; }
-    router.push("/login?reset=true");
+    setLoading(false);
+    if (res.ok) {
+      setMsg("✅ Password reset! Redirecting to login...");
+      setTimeout(() => router.push("/login"), 1500);
+    } else {
+      setMsg("❌ " + (data.error || "Failed"));
+    }
   }
 
-  if (!token) return <div className="p-6 text-">Invalid link. Go to <a href="/forgot-password" className="underline">forgot password</a> again.</div>;
+  if (!token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#fafaf7] p-6">
+        <div className="bg-white p-8 rounded border">Invalid reset link. No token found. <Link href="/forgot-password" className="underline">Request new link</Link></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#fafaf7] p-6">
-      <div className="w-full max-w- bg-white rounded- p-8 border">
-        <h1 className="text- font-serif">New password</h1>
-        {error && <div className="mt-4 bg-red-50 border border-red-200 p-3 rounded-xl text- text-red-700">{error}</div>}
+      <div className="w-full max-w-md bg-white rounded-2xl p-8 border">
+        <h1 className="text-2xl font-serif font-bold">Set new password</h1>
+        <p className="mt-2 text-sm text-gray-600">For {token.substring(0,6)}...</p>
         <form onSubmit={submit} className="mt-6 space-y-4">
-          <input required type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="8+ characters" className="w-full h- rounded-full border px-5" />
-          <button className="w-full h- rounded-full bg-[#1a4d2e] text-white font-semibold">Reset password</button>
+          <input required minLength={8} type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="New password (8+ chars)" className="w-full h-12 rounded-full border px-5" />
+          <button disabled={loading} className="w-full h-12 rounded-full bg-[#1a4d2e] text-white font-semibold disabled:opacity-50">
+            {loading ? "Resetting..." : "Reset password"}
+          </button>
+          {msg && <p className="text-sm mt-3">{msg}</p>}
         </form>
+        <Link href="/login" className="mt-6 block text-center text-sm underline">Back to login</Link>
       </div>
     </div>
-  );
-}
-
-export default function ResetPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-      <ResetInner />
-    </Suspense>
   );
 }
