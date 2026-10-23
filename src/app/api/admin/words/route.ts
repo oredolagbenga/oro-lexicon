@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/../auth";
+import { sendEmail } from "@/lib/email"; // <-- 1. ADD THIS
 
 export async function POST(req: Request) {
   try {
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
       include: { contributor: true }
     });
 
-    // NOTIFICATION: Feedback from admin decision
+    // NOTIFICATION + EMAIL
      try {
       if (updated.contributorId && updated.contributorId !== me.id) {
         const isApproved = status === "APPROVED";
@@ -67,12 +68,19 @@ export async function POST(req: Request) {
           }
         });
         console.log("NOTIFICATION CREATED:", notif.id, "for", updated.contributorId);
-      } else {
-        console.log("No notification - contributor is admin or missing", updated.contributorId, me.id);
+
+        // 2. ADD EMAIL VIA hello@oredola.dev — only on APPROVED
+        if (isApproved && updated.contributor?.email) {
+          await sendEmail(
+            updated.contributor.email,
+            `Your word ${updated.yoruba} is live on Oro Lexicon`,
+            `<div style="font-family:sans-serif"><p>Ẹ kú àárọ̀! 🎉</p><p>Your word <b>${updated.yoruba}</b> (${updated.english}) is now live.</p><p><a href="https://lexicon.oredola.dev/dictionary/${updated.slug}">View it in dictionary →</a></p><p>Oro Lexicon Team</p></div>`
+          );
+          console.log("EMAIL SENT to", updated.contributor.email);
+        }
       }
     } catch (notifError: any) {
-      console.error("NOTIFICATION CREATE FAILED:", notifError.message);
-      // Don't fail the whole request if notification fails
+      console.error("NOTIFICATION/EMAIL FAILED:", notifError.message);
     }
 
     return Response.json({ ok: true, word: updated });

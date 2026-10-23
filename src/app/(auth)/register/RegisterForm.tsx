@@ -101,8 +101,8 @@ export default function RegisterForm() {
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-[#1a4d2e] flex items-center justify-center text-white font-bold text-[13px]">O</div>
           <div>
-            <div className="serif text-[16px] leading-none">Oredola Lexicon</div>
-            <div className="text-[9px] tracking-widest uppercase text-black/40 -mt-0.5">by GNETSOLUTION</div>
+            <div className="serif text-[16px] leading-none">Oro Lexicon</div>
+            <div className="text-[9px] tracking-widest uppercase text-black/40 -mt-0.5">by Oredola Gbenga A.</div>
           </div>
         </Link>
         <div className="text-[10px] tracking-widest uppercase bg-[#f5d547] px-2.5 py-1 rounded-full font-bold">YORÙBÁ</div>
