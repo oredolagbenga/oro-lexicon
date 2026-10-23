@@ -1,17 +1,29 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function ResetPage() {
+export const dynamic = "force-dynamic";
+
+function ResetInner() {
   const token = useSearchParams().get("token");
-  const [pw, setPw] = useState(""); const [error, setError] = useState(""); const router = useRouter();
+  const [pw, setPw] = useState(""); 
+  const [error, setError] = useState(""); 
+  const router = useRouter();
+
   async function submit(e: any) {
     e.preventDefault();
-    const res = await fetch("/api/auth/reset-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, password: pw }) });
+    const res = await fetch("/api/auth/reset-password", { 
+      method: "POST", 
+      headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ token, password: pw }) 
+    });
     const data = await res.json();
     if (!res.ok) { setError(data.error); return; }
     router.push("/login?reset=true");
   }
+
+  if (!token) return <div className="p-6 text-">Invalid link. Go to <a href="/forgot-password" className="underline">forgot password</a> again.</div>;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#fafaf7] p-6">
       <div className="w-full max-w- bg-white rounded- p-8 border">
@@ -23,5 +35,13 @@ export default function ResetPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ResetPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <ResetInner />
+    </Suspense>
   );
 }
