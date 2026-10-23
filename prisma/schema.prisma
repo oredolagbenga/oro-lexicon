@@ -27,18 +27,7 @@ model User {
   auditLogs       AuditLog[]       @relation("ActorLogs")
   passwordResetTokens PasswordResetToken[]
 }
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  userId    String
-  tokenHash String   @unique
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
 model Category {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -174,6 +163,8 @@ model PasswordResetToken {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
