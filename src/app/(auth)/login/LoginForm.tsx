@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginForm() {
@@ -9,11 +9,11 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
+  
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
 
-    async function handleSubmit(e: React.FormEvent) {
+     async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -32,16 +32,14 @@ export default function LoginForm() {
     }
 
     if (res?.ok) {
-      // Success - go to dashboard, let middleware handle session
-      router.push("/dashboard");
-      router.refresh();
+      window.location.href = "/dashboard";
       return;
     }
 
     setError("Invalid email or password. Please try again.");
     setLoading(false);
   }
- 
+   
   return (
     <div className="min-h-screen bg-[#fafaf7] flex flex-col lg:flex-row">
       <style>{`
