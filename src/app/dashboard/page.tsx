@@ -10,6 +10,16 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/dashboard");
 
+  // NEW: If admin, send to admin dashboard
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+  
+  if (currentUser?.role === "ADMIN") {
+    redirect("/admin");
+  }
+
   const [words, categories, totalArchive, stats] = await Promise.all([
     prisma.word.findMany({
       where: { contributorId: session.user.id },
@@ -21,7 +31,6 @@ export default async function DashboardPage() {
     prisma.word.groupBy({ by: ["status"], where: { contributorId: session.user.id }, _count: true }),
   ]);
 
-  // FIXED: _count is number, not object, and added rejected
   const counts = {
     total: words.length,
     approved: stats.find(s => s.status === "APPROVED")?._count ?? 0,
