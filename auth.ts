@@ -6,17 +6,16 @@ import { prisma } from "@/lib/prisma";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
   session: { strategy: "jwt" },
+  trustHost: true,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   ...authConfig,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = (user as any).id;
-        // Set initial role
         token.role = (user as any).role;
         token.email = (user as any).email;
       }
-      // FIXED: Always fetch fresh role from DB so ADMIN update works instantly
-      // This fixes verify@orolexicon.com staying as contributor
       if (token.email) {
         try {
           const dbUser = await prisma.user.findUnique({
@@ -26,6 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (dbUser) {
             token.id = dbUser.id;
             token.role = dbUser.role;
+            token.email = dbUser.email;
           }
         } catch {}
       }
@@ -35,7 +35,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token && session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
-        (session.user as any).email = token.email;
+        if (token.email) session.user.email = token.email as string;
       }
       return session;
     },
