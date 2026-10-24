@@ -6,7 +6,10 @@ export async function POST(req: Request) {
   const { email } = await req.json();
   if (!email) return Response.json({ error: "Email required" }, { status: 400 });
 
-  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+  const user = await prisma.user.findUnique({ 
+    where: { email: email.toLowerCase().trim() } 
+  });
+  
   // Always return ok to prevent email enumeration
   if (!user) return Response.json({ ok: true });
 
@@ -23,11 +26,28 @@ export async function POST(req: Request) {
 
   const resetUrl = `https://lexicon.oredola.dev/reset-password?token=${token}`;
 
-  await sendEmail(
-    user.email,
-    "Reset your Oro Lexicon password",
-    `<div style="font-family:sans-serif"><p>Ẹ kú àárọ̀ ${user.name || ""},</p><p>Click to reset: <a href="${resetUrl}">${resetUrl}</a></p><p>This link expires in 1 hour.</p></div>`
-  );
+  // 👇 TRY/CATCH HERE — so email failure doesn't crash the route
+  try {
+    await sendEmail(
+      user.email,
+      "Reset your Oro Lexicon password",
+      `<div style="font-family:sans-serif; max-width:480px; line-height:1.6;">
+        <p>Ẹ kú àárọ̀ ${user.name || ""},</p>
+        <p>You requested a password reset for Oro Lexicon.</p>
+        <p style="margin:16px 0;">
+          <a href="${resetUrl}" style="background:#1a4d2e; color:white; padding:12px 24px; border-radius:999px; text-decoration:none; display:inline-block; font-weight:600;">
+            Reset Password →
+          </a>
+        </p>
+        <p style="font-size:13px; color:#666;">This link expires in 1 hour and can only be used once.</p>
+        <p style="font-size:12px; color:#999;">If you didn't request this, ignore this email.</p>
+      </div>`
+    );
+  } catch (e) {
+    console.error("Failed to send reset email:", e);
+    // Still return ok — don't reveal if email failed (security)
+    // But log it so you can see in Vercel logs
+  }
 
   return Response.json({ ok: true });
 }
