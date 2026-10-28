@@ -6,6 +6,7 @@ import ContributeForm from "./ContributeForm";
 import { Navbar } from "@/app/components/layout/Navbar";
 import { Footer } from "@/app/components/layout/Footer";
 
+export const metadata = { robots: { index: false, follow: false } };
 export default async function ContributePage() {
   const session = await auth();
   if (!session?.user) {
