@@ -21,6 +21,39 @@ export default async function HomePage() {
 
   const wordOfDay = recentWords[Math.floor(Math.random() * Math.max(1, recentWords.length))] || recentWords[0];
 
+  const dictionarySchema = {
+    "@context": "https://schema.org",
+    "@type": "Dictionary",
+    name: "Oro Lexicon",
+    alternateName: "Oro Lexicon Yoruba Dictionary",
+    description: "Community-driven Yorùbá dictionary preserving Egba, Ijebu and Standard Yorùbá dialects",
+    url: "https://lexicon.oredola.dev",
+    author: { "@type": "Person", name: "Oredola Gbenga Augustine", url: "https://oredola.dev" },
+    inLanguage: "yo",
+    isAccessibleForFree: true,
+    keywords: "Yoruba dictionary, Yoruba language, Egba, Ijebu, Standard Yoruba",
+  };
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      { "@type": "Question", name: "What is Oro Lexicon?", acceptedAnswer: { "@type": "Answer", text: "Oro Lexicon is a community-driven Yorùbá dictionary preserving Egba, Ijebu and Standard Yorùbá with audio, IPA, examples and translations." } },
+      { "@type": "Question", name: "Is Oro Lexicon free to use?", acceptedAnswer: { "@type": "Answer", text: "Yes, Oro Lexicon is 100% free and open for everyone to preserve Yoruba language and culture." } },
+      { "@type": "Question", name: "How can I contribute Yoruba words?", acceptedAnswer: { "@type": "Answer", text: "Sign up at lexicon.oredola.dev/register and submit words via contribute page for expert review." } },
+      { "@type": "Question", name: "Does Oro Lexicon include audio pronunciations?", acceptedAnswer: { "@type": "Answer", text: "Yes, Oro Lexicon includes audio pronunciations, IPA and example sentences for Yoruba words." } },
+    ],
+  };
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://lexicon.oredola.dev" },
+      { "@type": "ListItem", position: 2, name: "Dictionary", item: "https://lexicon.oredola.dev/dictionary" },
+      { "@type": "ListItem", position: 3, name: "About", item: "https://lexicon.oredola.dev/about" },
+      { "@type": "ListItem", position: 4, name: "Contribute", item: "https://lexicon.oredola.dev/contribute" },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-[#fafaf7] text-[#121212]">
       <style>{`
@@ -30,6 +63,9 @@ export default async function HomePage() {
       `}</style>
 
       <Navbar />
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(dictionarySchema)}} />
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(faqSchema)}} />
+<script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(breadcrumbSchema)}} />
 
       {/* Hero - Beautiful green like your example */}
       <section className="relative overflow-hidden bg-[#1a4d2e]">
