@@ -6,6 +6,7 @@ import { Navbar } from "@/app/components/layout/Navbar";
 import { Footer } from "@/app/components/layout/Footer";
 import { DashboardClient } from "../dashboard/DashboardClient";
 
+export const metadata = { robots: { index: false, follow: false } };
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/dashboard");

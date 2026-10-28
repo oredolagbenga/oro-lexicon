@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     siteName: "Oredola Lexicon",
     type: "website",
   },
-  robots: { index: true, follow: true },
+  robots: { index: true, follow: false },
 };
 
 export default function Page() {

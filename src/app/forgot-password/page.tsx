@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
+export const metadata = { robots: { index: false, follow: false } };
 export default function ForgotPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);

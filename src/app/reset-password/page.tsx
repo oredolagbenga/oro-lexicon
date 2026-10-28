@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 export const dynamic = 'force-dynamic';
 
+export const metadata = { robots: { index: false, follow: false } };
 function ResetForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");

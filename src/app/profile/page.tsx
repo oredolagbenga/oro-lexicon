@@ -7,6 +7,7 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { robots: { index: false, follow: false } };
 export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=/profile");

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import LoginForm from "./LoginForm";
 
+
 export const metadata: Metadata = {
   title: "Sign in — Oredola Lexicon | Yorùbá Dictionary",
   description: "Sign in to Oro Lexicon by Oredola Gbenga Augustine. Preserve Egba, Ijebu and Standard Yorùbá with audio, IPA and examples.",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     siteName: "Oro Lexicon by Oredola Gbenga ",
     type: "website",
   },
-  robots: { index: false, follow: true },
+  robots: { index: false, follow: false },
 };
 
 export default function Page() {
